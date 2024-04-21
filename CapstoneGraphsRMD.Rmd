@@ -1,0 +1,86 @@
+---
+title: "Capstone Graphs"
+output: html_document
+date: "2023-03-27"
+---
+Reading in the data for all three Species and loading in libraries
+```{r}
+archcow=read.csv('ArchCow.csv')
+archcow=archcow[,1:6]
+View(archcow)
+moderncow=read.csv('ModernCow.csv')
+View(moderncow)
+archelephant=read.csv('ArchElephant.csv')
+View(archelephant)
+library(ggplot2)
+```
+
+Archeological Cow Carbon Vs Machine Type Analysis 
+```{r}
+ac13cmachinelm=lm(X13C~as.factor(Machine),data=archcow)
+summary(ac13cmachinelm)
+anova(ac13)
+acCarbonMachineTest=t.test(archcow[archcow$Machine=='p',2],archcow[archcow$Machine=='GasBench',2],var.equal=F)
+acCarbonMachineTest
+ggplot()+geom_density(aes(x=archcow[archcow$Machine=='p',2]),color='red')+geom_density(aes(x=archcow[archcow$Machine=='GasBench',2]),color='blue')
+```
+Archeological Cow Oxygen Vs Machine Type Analysis
+```{r}
+ac18Omachinelm=lm(X18O~as.factor(Machine),data=archcow)
+summary(ac18Omachinelm)
+acOxygenMachineTest=t.test(archcow[archcow$Machine=='p',3],archcow[archcow$Machine=='GasBench',3],var.equal=F)
+acOxygenMachineTest
+ggplot()+geom_density(aes(x=archcow[archcow$Machine=='p',3]),color='red')+geom_density(aes(x=archcow[archcow$Machine=='GasBench',3]),color='blue')
+```
+Modern Cow Carbon Vs Machine Type Analysis
+```{r}
+mc13cmachinelm=lm(X13C~as.factor(Machine),data=moderncow)
+summary(mc13cmachinelm)
+mcCarbonMachineTest=t.test(moderncow[moderncow$Machine=='p',2],moderncow[moderncow$Machine=='GasBench',2],var.equal=F)
+mcCarbonMachineTest
+ggplot()+geom_density(aes(x=moderncow[moderncow$Machine=='p',2]),color='red')+geom_density(aes(x=moderncow[moderncow$Machine=='GasBench',2]),color='blue')
+```
+Modern Cow Oxygen Vs Machine Type Analysis
+```{r}
+mc18Omachinelm=lm(X18O~as.factor(Machine),data=moderncow)
+summary(mc18Omachinelm)
+mcOxygenMachineTest=t.test(moderncow[moderncow$Machine=='p',3],moderncow[moderncow$Machine=='GasBench',3],var.equal=F)
+mcOxygenMachineTest
+ggplot()+geom_density(aes(x=moderncow[moderncow$Machine=='p',3]),color='red')+geom_density(aes(x=moderncow[moderncow$Machine=='GasBench',3]),color='blue')
+```
+Archeologcial Elephant Carbon Vs Machine Type Analysis
+```{r}
+ae13cmachinelm=lm(X13C~as.factor(Machine),data=archelephant)
+summary(ae13cmachinelm)
+aeCarbonMachineTest=t.test(archelephant[archelephant$Machine=='p',2],archelephant[archelephant$Machine=='GasBench',2],var.equal=F)
+aeCarbonMachineTest
+ggplot()+geom_density(aes(x=archelephant[archelephant$Machine=='p',2]),color='red')+geom_density(aes(x=archelephant[archelephant$Machine=='GasBench',2]),color='blue')
+```
+Archeological Elephant Oxygen Vs Machine Type Analysis
+```{r}
+ae18Omachinelm=lm(X18O~as.factor(Machine),data=archelephant)
+summary(ae18Omachinelm)
+aeOxygenMachineTest=t.test(archelephant[archelephant$Machine=='p',3],archelephant[archelephant$Machine=='GasBench',3],var.equal=F)
+aeOxygenMachineTest
+ggplot()+geom_density(aes(x=archelephant[archelephant$Machine=='p',3]),color='red')+geom_density(aes(x=archelephant[archelephant$Machine=='GasBench',3]),color='blue')
+```
+
+Scatter plot for each species and each isotope by year
+```{r}
+ggpabsc13Xy=ggplot(archcow,aes(y=X13C,x=Year))+geom_point()+labs(title='Scatterplot for Archeological Cow',y='Delta Carbon 13 ratio',x='Year \n Figure 13')
+ggpmbsc13Xy=ggplot(moderncow,aes(y=X13C,x=Year))+geom_point()+labs(title='Scatterplot for Modern Cow',y='Delta Carbon 13 ratio',x='Year \n Figure 14')
+ggpaesc13Xy=ggplot(archelephant,aes(y=X13C,x=Year))+geom_point()+labs(title='Scatterplot for Archeological Elephant',y='Delta Carbon 13 ratio',x='Year \n Figure 15')
+grid.arrange(ggpabsc13Xy,ggpmbsc13Xy,ggpaesc13Xy,nrow=1)
+ ggpabso18Xy=ggplot(archcow,aes(y=X18O,x=Year))+geom_point()+labs(title='Scatterplot for Archeological Cow',y='Delta Oxygen 18 ratio',x='Year \n Figure 10')
+ggpmbso18Xy=ggplot(moderncow,aes(y=X18O,x=Year))+geom_point()+labs(title='Scatterplot for Modern Cow',y='Delta Oxygen 18 ratio',x='Year \n Figure 11')
+ggpaeso18Xy=ggplot(archelephant,aes(y=X18O,x=Year))+geom_point()+labs(title='Scatterplot for Archeological Elephant',y='Delta Oxygen 18 ratio',x='Year \n Figure 12')
+grid.arrange(ggpabso18Xy,ggpmbso18Xy,ggpaeso18Xy,nrow=1)
+```
+
+
+```{r}
+```
+
+
+
+
