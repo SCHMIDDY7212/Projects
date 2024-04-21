@@ -1,0 +1,181 @@
+---
+title: "Final Project"
+output:
+  word_document: default
+  html_document: default
+date: "2022-12-02"
+---
+```{r}
+#############################
+## Final Project Code ##
+#############################
+
+## Install and load packages
+library(rjags)
+library(MCMCvis)
+library(dplyr)
+## Load cat student data
+cat=read.table("cats.txt",header=T)
+cat$Breed=recode_factor(cat$Breed,A=1,B=1,C=1,D=0,E=0)
+attach(cat)
+n <- 40  # sample size
+p <- dim(cat)[2]-1  # number of regression coefficients
+
+#####################################################
+## Linear regression model ##
+#####################################################
+## (1) Create data list
+dataList1 <- list(
+        "n" = n,
+        "DeltaPCV" = DeltaPCV,
+        "Dose" = Dose,
+        "Type" = Type,
+        "Breed" = Breed)
+
+## (2) Specify list of parameter(s) to be monitored
+parameters1 <- c("beta","sig2")
+
+## (3) Specify initial values for parameter(s) in Metropolis-Hastings algorithm
+initsValues1 <- list(
+        "beta" = rep(0,p+1),
+        "inv_sig2" = 1
+)
+
+## (4) Specify parameters for running Metropolis-Hastings algorithm
+adaptSteps1 <- 10000              # number of steps to "tune" the samplers
+burnInSteps1 <- 20000             # number of steps to "burn-in" the samplers
+nChains1 <- 3                    # number of chains to run
+numSavedSteps1 <- 50000          # total number of steps in chains to save
+thinSteps1 <- 10                  # number of steps to "thin" (1 = keep every step)
+nIter <- ceiling((numSavedSteps1*thinSteps1)/nChains1) 	# steps per chain
+
+## (5) Create, initialize, and adapt the model
+# This will require you to create a separate .txt file which specifies
+# the model
+jagsModelF <- jags.model("Final_Project_Model.txt", 
+                         data = dataList1, 
+                         inits = initsValues1, 
+                         n.chains = nChains1, 
+                         n.adapt = adaptSteps1)
+jagsModelF
+## (6) Burn-in the algorithm
+if(burnInSteps1>0){
+        cat( "Burning in the MCMC chain...\n")
+        update(jagsModelF, n.iter = burnInSteps1)
+}
+
+## (7) Run MCMC algorithm
+cat("Sampling final MCMC chain...\n" )
+codaSamplesF <- coda.samples(jagsModelF, 
+                             variable.names = parameters1, 
+                             n.iter = nIter, 
+                             thin = thinSteps1)
+
+## (8) Diagnose convergence and plot posterior densities
+par(ask=T)
+plot(codaSamplesF)
+
+## (9) Calculate numerical summaries for the posterior samples
+summary(codaSamplesF)
+
+## (10) Retrieve posterior samples for later use
+mcmcChainF <- as.matrix(codaSamplesF)
+
+## (11) Other plots
+# Boxplot of posteriors for beta
+boxplot(mcmcChainF[,1:5], main = "Posterior samples of beta",
+        names=c("Intercept","Dose","Type","Breed","Sig2"))
+abline(h = 0, lty = 2, col="red")
+
+# 50% (thin line) and 95% (thick line) credible interval "caterpillar" plots
+# dot is the posterior median
+MCMCplot(codaSamplesF, params = "beta",
+         main = "Posterior CIs for beta", ref = NULL)
+```
+
+
+```{r}
+
+## Install and load packages
+library(rjags)
+library(MCMCvis)
+library(dplyr)
+## Load cat student data
+cat=read.table("cats.txt",header=T)
+cat$Breed=recode_factor(cat$Breed,A=1,B=1,C=1,D=0,E=0)
+attach(cat)
+n <- 40  # sample size
+p <- dim(cat)[2]-1  # number of regression coefficients
+# taking out School and Y but add one for intercept term
+
+#####################################################
+## Linear regression model ##
+#####################################################
+## (1) Create data list
+dataList1 <- list(
+  "n" = n,
+  "DeltaPCV" = DeltaPCV,
+  "Dose" = Dose,
+  "Type" = Type,
+  "Breed" = Breed)
+
+## (2) Specify list of parameter(s) to be monitored
+parameters1 <- c("beta","sig2")
+
+## (3) Specify initial values for parameter(s) in Metropolis-Hastings algorithm
+initsValues1F <- list(
+  "beta" = rep(0,p+3),
+  "inv_sig2" = .01
+)
+
+## (4) Specify parameters for running Metropolis-Hastings algorithm
+adaptSteps1 <- 10000              # number of steps to "tune" the samplers
+burnInSteps1 <- 20000             # number of steps to "burn-in" the samplers
+nChains1 <- 3                    # number of chains to run
+numSavedSteps1 <- 50000          # total number of steps in chains to save
+thinSteps1 <- 10                  # number of steps to "thin" (1 = keep every step)
+nIter <- ceiling((numSavedSteps1*thinSteps1)/nChains1) 	# steps per chain
+
+## (5) Create, initialize, and adapt the model
+# This will require you to create a separate .txt file which specifies
+# the model
+jagsModelF1 <- jags.model("Final_Project_Model_1.txt", 
+                         data = dataList1, 
+                         inits = initsValues1F, 
+                         n.chains = nChains1, 
+                         n.adapt = adaptSteps1)
+jagsModelF1
+## (6) Burn-in the algorithm
+if(burnInSteps1>0){
+  cat( "Burning in the MCMC chain...\n")
+  update(jagsModelF1, n.iter = burnInSteps1)
+}
+
+## (7) Run MCMC algorithm
+cat("Sampling final MCMC chain...\n" )
+codaSamplesF1 <- coda.samples(jagsModelF1, 
+                             variable.names = parameters1, 
+                             n.iter = nIter, 
+                             thin = thinSteps1)
+
+## (8) Diagnose convergence and plot posterior densities
+par(mar=c(1,1,1,1))
+plot(codaSamplesF1)
+
+## (9) Calculate numerical summaries for the posterior samples
+summary(codaSamplesF1)
+
+## (10) Retrieve posterior samples for later use
+mcmcChainF1 <- as.matrix(codaSamplesF1)
+
+## (11) Other plots
+# Boxplot of posteriors for beta
+boxplot(mcmcChainF1[,1:7], main = "Posterior samples of beta",
+        names=c("Intercept","Dose","Type","Breed","Breed*Type","Breed*Dose","Sig2"))
+abline(h = 0, lty = 2, col="red")
+
+# 50% (thin line) and 95% (thick line) credible interval "caterpillar" plots
+# dot is the posterior median
+MCMCplot(codaSamplesF1, params = "beta",
+         main = "Posterior CIs for beta", ref = NULL)
+

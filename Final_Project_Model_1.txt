@@ -1,0 +1,20 @@
+model
+{
+
+  # Sampling model (linear regression)
+  for(i in 1:n){
+    DeltaPCV[i] ~ dnorm(mu[i],inv_sig2)
+    mu[i] <- beta[1]+beta[2]*Dose[i]+beta[3]*Type[i]+beta[4]*Breed[i]+beta[5]*Breed[i]*Type[i]+beta[6]*Breed[i]*Dose[i]
+  }
+
+  # Priors
+  # Regression coefficients
+  for(i in 1:6){
+    beta[i] ~ dnorm(0,1e-10)
+  }
+  
+  # Precision parameter
+  inv_sig2 ~ dgamma(0.01,0.01)
+  sig2 <- 1/inv_sig2
+
+}
